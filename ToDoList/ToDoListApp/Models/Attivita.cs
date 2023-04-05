@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ToDoListApp.Models
+﻿namespace ToDoListApp.Models
 {
-    internal class Attivita
+    public class Attivita
     {
         /// <summary>
         /// Nome dell'attività
