@@ -1,4 +1,5 @@
-﻿using ToDoListApp.Models;
+﻿using System.Diagnostics;
+using ToDoListApp.Models;
 
 namespace ToDoListApp
 {
@@ -8,6 +9,8 @@ namespace ToDoListApp
         {
             // lista delle attività
             List<Attivita> todoList = new List<Attivita>();
+
+            #region inserimento
             // variabile per gestire se l'utente vuole inserire nuove attività
             bool elencoTerminato = false;
 
@@ -123,8 +126,154 @@ namespace ToDoListApp
                 } while (vuoleInserireValido == false);
 
             }
+            #endregion inserimento
 
-            //TODO
+            #region cancellazione
+            // variabile per gestire se l'utente vuole cancellare un'attività
+            bool cancellazioneTerminata = false;
+
+            // ciclo per gestire se l'utente vuole cancellare un'attività
+            while (cancellazioneTerminata == false)
+            {
+                // variabile per gestire se l'utente ha digitato correttamente il carattere 'S' o 'N'
+                bool vuoleCancellareValido = false;
+                // ciclo per verificare se l'utente ha digitato correttamente il carattere 'S' o 'N'
+                do
+                {
+                    try
+                    {
+                        // input se l'utente vuole cancellare un'attività
+                        Console.WriteLine("Vuoi cancellare un'attività? (digita S o N)");
+                        string? vuoleCancellare = Console.ReadLine();
+
+                        // controlla che il valore inserito sia valido, altrimenti genera un'eccezione
+                        if (vuoleCancellare != "S" && vuoleCancellare != "N")
+                        {
+                            throw new ArgumentException("Digita 'S' o 'N'");
+                        }
+                        else
+                        {
+                            vuoleCancellareValido = true;
+                        }
+
+                        // se l'utente non vuole cancellare un'attività, termina il ciclo per la cancellazione di attività (quello più esterno)
+                        if (vuoleCancellare != "S")
+                        {
+                            cancellazioneTerminata = true;
+                        }
+
+                        // se l'utente vuole cancellare un'attività
+                        if (cancellazioneTerminata == false)
+                        {
+                            // mostra a video l'elenco di tutte le attività
+                            Console.WriteLine("Elenco delle attività esistenti:");
+                            for (int i = 0; i < todoList.Count; i++)
+                            {
+                                var numElenco = i + 1;
+                                var attivita = todoList[i];
+                                Console.WriteLine($"{numElenco}. Attività: {attivita.Nome}. Durata stimata: {attivita.GetDurata()}");
+                            }
+
+                            // input del nome dell'attività da cancellare
+                            Console.WriteLine("Digita il nome dell'attività che vorresti cancellare:");
+                            string? nomeAttivitaDaCancellare = Console.ReadLine();
+                            if (string.IsNullOrWhiteSpace(nomeAttivitaDaCancellare)) // controlla che il nome non sia null, vuoto o contenga soltanto spazi
+                            {
+                                throw new ArgumentNullException(nameof(nomeAttivitaDaCancellare),
+                                    "Il nome dell'attività non è valido.");
+                            }
+
+                            // controlla che il nome sia presente nell'elenco
+                            if (todoList.Any(x => x.Nome == nomeAttivitaDaCancellare) == false)
+                            {
+                                throw new ArgumentException(nameof(nomeAttivitaDaCancellare),
+                                    "Il nome dell'attività non esiste.");
+                            }
+
+                            /*
+                            // metodo 1
+                            var listaAttivitaFiltrata = todoList.Where(attivita => attivita.Nome == nomeAttivitaDaCancellare);
+                            var attivitaDaCancellare1 = listaAttivitaFiltrata.First();
+                            todoList.Remove(attivitaDaCancellare1);
+
+                            // metodo 2
+                            Attivita? attivitaDaCancellare2 = null;
+                            foreach (var attivita in todoList)
+                            {
+                                if (attivita.Nome == nomeAttivitaDaCancellare)
+                                {
+                                    attivitaDaCancellare2 = attivita;
+                                }
+                            }
+                            if (attivitaDaCancellare2 != null)
+                            {
+                                todoList.Remove(attivitaDaCancellare2);
+                            }
+
+                            // metodo 3
+                            List<Attivita> elencoSenzaAttivitaDaCancellare = new List<Attivita>();
+                            foreach (var attivita in todoList)
+                            {
+                                if (attivita.Nome != nomeAttivitaDaCancellare)
+                                {
+                                    elencoSenzaAttivitaDaCancellare.Add(attivita);
+                                }
+                            }
+                            todoList = elencoSenzaAttivitaDaCancellare;
+
+                            // metodo 4 
+                            var attivitaDaEliminare = todoList.Where(attivita => attivita.Nome == nomeAttivitaDaCancellare).First();
+                            int indiceAttivitaDaCancellare1 = todoList.IndexOf(attivitaDaEliminare);
+                            todoList.RemoveAt(indiceAttivitaDaCancellare1);
+
+                            // metodo 5
+                            int indiceAttivitaDaCancellare2 = -1;
+                            for (int i = 0; i < todoList.Count; i++)
+                            {
+                                if (todoList[i].Nome == nomeAttivitaDaCancellare)
+                                {
+                                    indiceAttivitaDaCancellare2 = i;
+                                }
+                            } 
+                            todoList.RemoveAt(indiceAttivitaDaCancellare2);
+
+                            // metodo 6 (sconsigliato)
+                            //for (int i = 0;i < todoList.Count;i++)
+                            //{
+                            //    var attivita = todoList[i];
+                            //    if (attivita.Nome == nomeAttivitaDaCancellare)
+                            //    {
+                            //        todoList.Remove(attivita);
+                            //    }
+                            //}
+                            */
+
+                            // metodo 7 (anche con più nomi uguali) <-- CONSIGLIATO
+                            // crea una nuova lista di attività filtrata per nome diverso da quello digitato dall'utente e la sostituisce
+                            todoList = todoList.Where(attivita => attivita.Nome != nomeAttivitaDaCancellare).ToList();
+
+                            // metodo 7 esteso
+                            //var listaFiltrata = todoList.Where(attivita => attivita.Nome != nomeAttivitaDaCancellare).ToList();
+                            //todoList = listaFiltrata;
+
+                            // mostra a video l'elenco di tutte le attività
+                            Console.WriteLine("Elenco delle attività aggiornato:");
+                            for (int i = 0; i < todoList.Count; i++)
+                            {
+                                var numElenco = i + 1;
+                                var attivita = todoList[i];
+                                Console.WriteLine($"{numElenco}. Attività: {attivita.Nome}. Durata stimata: {attivita.GetDurata()}");
+                            }
+                        }
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        vuoleCancellareValido = false;
+                    }
+                } while (vuoleCancellareValido == false);
+            }
+            #endregion
 
             Console.ReadLine();
         }
