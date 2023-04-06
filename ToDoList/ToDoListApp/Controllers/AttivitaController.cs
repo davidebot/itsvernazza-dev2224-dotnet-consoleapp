@@ -13,10 +13,10 @@ namespace ToDoListApp.Controllers
         public void Inserimento()
         {
             // variabile per gestire se l'utente vuole inserire nuove attività
-            bool elencoTerminato = false;
+            bool inserimentoTerminato = false;
 
             // ciclo per gestire se l'utente vuole inserire nuove attività
-            while (elencoTerminato == false)
+            while (inserimentoTerminato == false)
             {
                 // input del nome dell'attività
                 Console.WriteLine("Inserisci un nome per l'attività");
@@ -42,29 +42,8 @@ namespace ToDoListApp.Controllers
                     Durata = durataConvertita,
                 };
 
-                // alternativa al .Any usato successivamente
-                //foreach (Attivita attivita in todoList)
-                //{
-                //    if (attivita.Nome == nuovaAttivita.Nome)
-                //    {
-                //        throw new InvalidOperationException($"L'attività con nome {nuovaAttivita.Nome} è già presente");
-                //    }
-                //    else
-                //    {
-                //        todoList.Add(nuovaAttivita);
-                //    }
-                //}
-
-                // alternativa compatta al .Any usato successivamente
-                //if (todoList.Any(attivita => attivita.Nome.ToLower().Trim() == nuovaAttivita.Nome.ToLower().Trim()))
-
                 // controlla se ALMENO UN elemento nella lista delle attività contiene il nome della nuova attività (in minuscolo, senza spazi)
-                if (todoList
-                    .Any(attivita =>
-                    {
-                        return attivita.Nome.ToLower().Trim() == nuovaAttivita.Nome.ToLower().Trim();
-                    })
-                )
+                if (todoList.Any(attivita => attivita.Nome.ToLower().Trim() == nuovaAttivita.Nome.ToLower().Trim()))
                 {
                     // eccezione generata se il nome dell'attività è già presente
                     throw new InvalidOperationException($"L'attività con nome {nuovaAttivita.Nome} è già presente");
@@ -78,15 +57,8 @@ namespace ToDoListApp.Controllers
                 // mostra a video l'elenco di tutte le attività
                 Visualizza();
 
-                // alternativa al ciclo for precedente
-                //int progressivoAttivita = 0;
-                //foreach (var attivita in todoList) 
-                //{
-                //    progressivoAttivita++;
-                //    Console.WriteLine($"{progressivoAttivita}. Attività: {attivita.Nome}. Durata stimata: {attivita.GetDurata()}");
-                //}
-
-                elencoTerminato = VuoleTerminare("Vuoi inserire una nuova attività?");
+                // chiede all'utente se vuole inserire nuove attività
+                inserimentoTerminato = VuoleTerminare("Vuoi inserire una nuova attività?");
             }
         }
 
@@ -133,10 +105,6 @@ namespace ToDoListApp.Controllers
                     throw new InvalidCastException("La durata inserita non è valida.");
                 }
 
-                //var attivita = todoList.Where(attivita => attivita.Nome == nomeAttivitaDaModificare).First();
-                //attivita.Nome = nuovoNome;
-                //attivita.Durata = durataConvertita;
-
                 // nuova lista coi valori modificati
                 List<Attivita> listaModificata = new List<Attivita>();
                 // ciclo per ogni attività nella lista originale
@@ -145,10 +113,6 @@ namespace ToDoListApp.Controllers
                     // se l'attività corrente è quella che si intende modificare
                     if (attivita.Nome == nomeAttivitaDaModificare)
                     {
-                        //attivita.Nome = nuovoNome;
-                        //attivita.Durata = durataConvertita;
-                        //listaModificata.Add(attivita);
-
                         // crea una nuova attività 
                         var nuovaAttivita = new Attivita()
                         {
@@ -168,6 +132,10 @@ namespace ToDoListApp.Controllers
                 // sostituisce la lista originale con la lista modificata
                 todoList = listaModificata;
 
+                // mostra a video l'elenco di tutte le attività
+                Visualizza();
+
+                // chiede all'utente se vuole modificare un'altra attività
                 modificaTerminata = VuoleTerminare("Vuoi modificare un'altra attività?");
             }
         }
@@ -181,13 +149,7 @@ namespace ToDoListApp.Controllers
             while (cancellazioneTerminata == false)
             {
                 // mostra a video l'elenco di tutte le attività
-                Console.WriteLine("Elenco delle attività esistenti:");
-                for (int i = 0; i < todoList.Count; i++)
-                {
-                    var numElenco = i + 1;
-                    var attivita = todoList[i];
-                    Console.WriteLine($"{numElenco}. Attività: {attivita.Nome}. Durata stimata: {attivita.GetDurata()}");
-                }
+                Visualizza();
 
                 // input del nome dell'attività da cancellare
                 Console.WriteLine("Digita il nome dell'attività che vorresti cancellare:");
@@ -205,81 +167,14 @@ namespace ToDoListApp.Controllers
                         "Il nome dell'attività non esiste.");
                 }
 
-                /*
-                // metodo 1
-                var listaAttivitaFiltrata = todoList.Where(attivita => attivita.Nome == nomeAttivitaDaCancellare);
-                var attivitaDaCancellare1 = listaAttivitaFiltrata.First();
-                todoList.Remove(attivitaDaCancellare1);
-
-                // metodo 2
-                Attivita? attivitaDaCancellare2 = null;
-                foreach (var attivita in todoList)
-                {
-                    if (attivita.Nome == nomeAttivitaDaCancellare)
-                    {
-                        attivitaDaCancellare2 = attivita;
-                    }
-                }
-                if (attivitaDaCancellare2 != null)
-                {
-                    todoList.Remove(attivitaDaCancellare2);
-                }
-
-                // metodo 3
-                List<Attivita> elencoSenzaAttivitaDaCancellare = new List<Attivita>();
-                foreach (var attivita in todoList)
-                {
-                    if (attivita.Nome != nomeAttivitaDaCancellare)
-                    {
-                        elencoSenzaAttivitaDaCancellare.Add(attivita);
-                    }
-                }
-                todoList = elencoSenzaAttivitaDaCancellare;
-
-                // metodo 4 
-                var attivitaDaEliminare = todoList.Where(attivita => attivita.Nome == nomeAttivitaDaCancellare).First();
-                int indiceAttivitaDaCancellare1 = todoList.IndexOf(attivitaDaEliminare);
-                todoList.RemoveAt(indiceAttivitaDaCancellare1);
-
-                // metodo 5
-                int indiceAttivitaDaCancellare2 = -1;
-                for (int i = 0; i < todoList.Count; i++)
-                {
-                    if (todoList[i].Nome == nomeAttivitaDaCancellare)
-                    {
-                        indiceAttivitaDaCancellare2 = i;
-                    }
-                } 
-                todoList.RemoveAt(indiceAttivitaDaCancellare2);
-
-                // metodo 6 (sconsigliato)
-                //for (int i = 0;i < todoList.Count;i++)
-                //{
-                //    var attivita = todoList[i];
-                //    if (attivita.Nome == nomeAttivitaDaCancellare)
-                //    {
-                //        todoList.Remove(attivita);
-                //    }
-                //}
-                */
-
                 // metodo 7 (anche con più nomi uguali) <-- CONSIGLIATO
                 // crea una nuova lista di attività filtrata per nome diverso da quello digitato dall'utente e la sostituisce
                 todoList = todoList.Where(attivita => attivita.Nome != nomeAttivitaDaCancellare).ToList();
 
-                // metodo 7 esteso
-                //var listaFiltrata = todoList.Where(attivita => attivita.Nome != nomeAttivitaDaCancellare).ToList();
-                //todoList = listaFiltrata;
-
                 // mostra a video l'elenco di tutte le attività
-                Console.WriteLine("Elenco delle attività aggiornato:");
-                for (int i = 0; i < todoList.Count; i++)
-                {
-                    var numElenco = i + 1;
-                    var attivita = todoList[i];
-                    Console.WriteLine($"{numElenco}. Attività: {attivita.Nome}. Durata stimata: {attivita.GetDurata()}");
-                }
+                Visualizza();
 
+                // chiede all'utente se vuole cancellare un'altra attività
                 cancellazioneTerminata = VuoleTerminare("Vuoi cancellare un'altra attività?");
             }
         }
