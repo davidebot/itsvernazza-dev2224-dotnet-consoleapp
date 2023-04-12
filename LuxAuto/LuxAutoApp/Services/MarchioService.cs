@@ -51,7 +51,18 @@ namespace LuxAutoApp.Services
                 var gruppoScelto = gruppiPresenti.Where(gruppo => gruppo.Nome == gruppoInput).FirstOrDefault();
                 if (gruppoScelto == null)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(gruppoInput), "Il gruppo digitato non è stato inserito. Procedere con l'inserimento del gruppo prima dell'inserimento del marchio.");
+                    Console.WriteLine("Gruppo non presente. Vuoi inserire il gruppo? (digita 'S' o 'N')");
+                    string? procedeInserimento = Console.ReadLine();
+                    if (procedeInserimento == "S")
+                    {
+                        _gruppoService.Inserimento();
+                        gruppiPresenti = _gruppoService.GetGruppiPresenti();
+                        gruppoScelto = gruppiPresenti.Where(gruppo => gruppo.Nome == gruppoInput).FirstOrDefault();
+                    }
+                    if (gruppoScelto == null)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(gruppoInput), "Il gruppo digitato non è stato inserito. Procedere con l'inserimento del gruppo prima dell'inserimento del marchio.");
+                    }
                 }
 
                 // crea l'istanza del nuovo marchio che intende inserire l'utente
@@ -131,6 +142,17 @@ namespace LuxAutoApp.Services
                 if (string.IsNullOrWhiteSpace(nuovoGruppo) == false)
                 {
                     gruppoScelto = gruppiPresenti.Where(gruppo => gruppo.Nome == nuovoGruppo).FirstOrDefault();
+                    if (gruppoScelto == null)
+                    {
+                        Console.WriteLine("Gruppo non presente. Vuoi inserire il gruppo? (digita 'S' o 'N')");
+                        string? procedeInserimento = Console.ReadLine();
+                        if (procedeInserimento == "S")
+                        {
+                            _gruppoService.Inserimento();
+                            gruppiPresenti = _gruppoService.GetGruppiPresenti();
+                            gruppoScelto = gruppiPresenti.Where(gruppo => gruppo.Nome == nuovoGruppo).FirstOrDefault();
+                        } 
+                    }
                 }
                 if (gruppoScelto == null)
                 {

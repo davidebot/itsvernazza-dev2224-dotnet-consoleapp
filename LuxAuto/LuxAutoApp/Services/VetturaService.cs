@@ -14,12 +14,14 @@ namespace LuxAutoApp.Services
 
         // la dipendenza MarchioService registrata
         private readonly MarchioService _marchioService;
+        private readonly GruppoService _gruppoService;
 
         // instanziamento classe VetturaService con recupero della dipendenza MarchioService registrata
-        public VetturaService(MarchioService marchioService)
+        public VetturaService(MarchioService marchioService, GruppoService gruppoService)
         {
             // assegnazione della dipendenza MarchioService registrata
             _marchioService = marchioService;
+            _gruppoService = gruppoService;
         }
 
         public void Inserimento()
@@ -47,7 +49,18 @@ namespace LuxAutoApp.Services
                 var marchioScelto = marchiPresenti.Where(marchio => marchio.Nome == marcaInput).FirstOrDefault();
                 if (marchioScelto == null)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(marcaInput), "Il marchio digitato non è stato inserito. Procedere con l'inserimento del marchio prima dell'inserimento della vettura.");
+                    Console.WriteLine("Marchio non presente. Vuoi inserire il marchio? (digita 'S' o 'N')");
+                    string? procedeInserimento = Console.ReadLine();
+                    if (procedeInserimento == "S")
+                    {
+                        _marchioService.Inserimento();
+                        marchiPresenti = _marchioService.GetMarchiPresenti();
+                        marchioScelto = marchiPresenti.Where(marchio => marchio.Nome == marcaInput).FirstOrDefault(); 
+                    }
+                    if (marchioScelto == null)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(marcaInput), "Il marchio digitato non è stato inserito. Procedere con l'inserimento del marchio prima dell'inserimento della vettura.");
+                    }
                 }
 
                 // input del modello della vettura
@@ -136,6 +149,14 @@ namespace LuxAutoApp.Services
                 if (string.IsNullOrWhiteSpace(nuovaMarca) == false)
                 {
                     marchioScelto = marchiPresenti.Where(marchio => marchio.Nome == nuovaMarca).FirstOrDefault();
+                    Console.WriteLine("Marchio non presente. Vuoi inserire il marchio? (digita 'S' o 'N')");
+                    string? procedeInserimento = Console.ReadLine();
+                    if (procedeInserimento == "S")
+                    {
+                        _marchioService.Inserimento();
+                        marchiPresenti = _marchioService.GetMarchiPresenti();
+                        marchioScelto = marchiPresenti.Where(marchio => marchio.Nome == nuovaMarca).FirstOrDefault();
+                    }
                 }
                 if (marchioScelto == null)
                 {
@@ -244,11 +265,102 @@ namespace LuxAutoApp.Services
             }
         }
 
-        public void Ricerca(string nomeMarchio)
+        public void Ricerca()
         {
+            Console.WriteLine("Digita una targa o premi invio per ignorare.");
+            string? targaInput = Console.ReadLine();
+            Console.WriteLine("Digita una marca o premi invio per ignorare.");
+            _marchioService.Visualizzazione();
+            string? marcaInput = Console.ReadLine();
+            Console.WriteLine("Digita un gruppo o premi invio per ignorare.");
+            _gruppoService.Visualizzazione();
+            string? gruppoInput = Console.ReadLine();
+            Console.WriteLine("Digita un modello o premi invio per ignorare.");
+            string? modelloInput = Console.ReadLine();
+            Console.WriteLine("Digita il chilometraggio minimo o premi invio per ignorare.");
+            string? chilometraggioMinInput = Console.ReadLine();
+            Console.WriteLine("Digita il chilometraggio massimo o premi invio per ignorare.");
+            string? chilometraggioMaxInput = Console.ReadLine();
+
+            uint? chilometraggioMin = null;
+            uint? chilometraggioMax = null;
+
             // mostra a video l'elenco di tutte le vetture di un dato marchio
-            Console.WriteLine($"Elenco delle vetture del marchio '{nomeMarchio}':");
-            var listaFiltrata = vetture.Where(vettura => vettura.Marca.Nome == nomeMarchio).ToList();
+            var messaggio = "Elenco delle vetture filtrato";
+            var filtri = "";
+            if (string.IsNullOrEmpty(targaInput) == false)
+            {
+                filtri += $" targa '{targaInput}'";
+            }
+            if (string.IsNullOrEmpty(marcaInput) == false)
+            {
+                if (string.IsNullOrEmpty(filtri) == false)
+                {
+                    filtri += ",";
+                }
+                filtri += $" marchio '{marcaInput}'";
+            }
+            if (string.IsNullOrEmpty(gruppoInput) == false)
+            {
+                if (string.IsNullOrEmpty(filtri) == false)
+                {
+                    filtri += ",";
+                }
+                filtri += $" gruppo '{gruppoInput}'";
+            }
+            if (string.IsNullOrEmpty(modelloInput) == false)
+            {
+                if (string.IsNullOrEmpty(filtri) == false)
+                {
+                    filtri += ",";
+                }
+                filtri += $" modello '{modelloInput}'";
+            }
+            if (string.IsNullOrEmpty(chilometraggioMinInput) == false)
+            {
+                if (UInt32.TryParse(chilometraggioMinInput, out uint chilometraggioMinConvertito))
+                {
+                    chilometraggioMin = chilometraggioMinConvertito;
+                }
+                else
+                {
+                    throw new InvalidCastException("Il chilometraggio inserito non è valido.");
+                }
+
+                if (string.IsNullOrEmpty(filtri) == false)
+                {
+                    filtri += ",";
+                }
+                filtri += $" chilometraggio minimo '{chilometraggioMinInput}'";
+            }
+            if (string.IsNullOrEmpty(chilometraggioMaxInput) == false)
+            {
+                if (UInt32.TryParse(chilometraggioMaxInput, out uint chilometraggioMaxConvertito))
+                {
+                    chilometraggioMax = chilometraggioMaxConvertito;
+                }
+                else
+                {
+                    throw new InvalidCastException("Il chilometraggio inserito non è valido.");
+                }
+
+                if (string.IsNullOrEmpty(filtri) == false)
+                {
+                    filtri += ",";
+                }
+                filtri += $" chilometraggio massimo '{chilometraggioMaxInput}'";
+            }
+            messaggio += filtri + ":";
+
+            Console.WriteLine(messaggio);
+            var listaFiltrata = vetture.Where(vettura => 
+                (string.IsNullOrEmpty(targaInput) || vettura.Targa == targaInput) &&
+                (string.IsNullOrEmpty(marcaInput) || vettura.Marca.Nome == marcaInput) &&
+                (string.IsNullOrEmpty(gruppoInput) || vettura.Marca.Gruppo.Nome == gruppoInput) && 
+                (string.IsNullOrEmpty(modelloInput) || vettura.Modello == modelloInput) && 
+                (chilometraggioMin == null || vettura.Chilometraggio >= chilometraggioMin) &&
+                (chilometraggioMax == null || vettura.Chilometraggio <= chilometraggioMax) 
+            ).ToList();
             for (int i = 0; i < listaFiltrata.Count; i++)
             {
                 var numElenco = i + 1;

@@ -112,13 +112,7 @@ namespace LuxAutoApp.Controllers
                                     _vetturaService.Visualizzazione();
                                     break;
                                 case "VVF":
-                                    Console.WriteLine("Digita il nome del marchio da utilizzare come filtro di ricerca.");
-                                    string? marchioInput = Console.ReadLine();
-                                    if (string.IsNullOrWhiteSpace(marchioInput))
-                                    {
-                                        throw new ArgumentNullException(nameof(marchioInput));
-                                    }
-                                    _vetturaService.Ricerca(marchioInput);
+                                    _vetturaService.Ricerca();
                                     break;
                             }
                         }

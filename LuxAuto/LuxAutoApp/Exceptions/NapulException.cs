@@ -9,9 +9,9 @@ namespace LuxAutoApp.Exceptions
     public class NapulException : System.Exception
     {
         public string Citazione { get; set; } = string.Empty;
-        public NapulException(string offesa)
+        public NapulException(string citazione)
         {
-            Citazione = offesa;
+            Citazione = citazione;
         }
     }
 }
